@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitcoin Wallet</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #f7931a, #ffcd00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: #888;
+            font-size: 1.1rem;
+        }
+
+        .wallet-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #f7931a;
+        }
+
+        .wallet-actions {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #f7931a, #ffcd00);
+            color: #000;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(247, 147, 26, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ccc;
+            font-size: 0.9rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #f7931a;
+        }
+
+        .wallet-info {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: #888;
+        }
+
+        .info-value {
+            color: #fff;
+            font-weight: 600;
+            word-break: break-all;
+        }
+
+        .balance-display {
+            text-align: center;
+            padding: 30px;
+            background: rgba(247, 147, 26, 0.1);
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .balance-amount {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #f7931a;
+        }
+
+        .balance-label {
+            color: #888;
+            font-size: 1.2rem;
+        }
+
+        .qr-code {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .qr-code img {
+            max-width: 200px;
+            border-radius: 10px;
+            background: #fff;
+            padding: 10px;
+        }
+
+        .transactions-list {
+            margin-top: 20px;
+        }
+
+        .transaction-item {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 3px solid #f7931a;
+        }
+
+        .transaction-item.received {
+            border-left-color: #4ade80;
+        }
+
+        .transaction-item.sent {
+            border-left-color: #f87171;
+        }
+
+        .tx-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .tx-id {
+            font-size: 0.85rem;
+            color: #888;
+            word-break: break-all;
+        }
+
+        .tx-amount {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .tx-amount.positive {
+            color: #4ade80;
+        }
+
+        .tx-amount.negative {
+            color: #f87171;
+        }
+
+        .tx-status {
+            font-size: 0.8rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .tx-status.confirmed {
+            background: rgba(74, 222, 128, 0.2);
+            color: #4ade80;
+        }
+
+        .tx-status.pending {
+            background: rgba(250, 204, 21, 0.2);
+            color: #facc15;
+        }
+
+        .send-form {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .warning {
+            background: rgba(248, 113, 113, 0.1);
+            border: 1px solid rgba(248, 113, 113, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            color: #f87171;
+        }
+
+        .success {
+            background: rgba(74, 222, 128, 0.1);
+            border: 1px solid rgba(74, 222, 128, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            color: #4ade80;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .copy-btn {
+            background: none;
+            border: none;
+            color: #f7931a;
+            cursor: pointer;
+            padding: 5px 10px;
+            font-size: 0.9rem;
+        }
+
+        .copy-btn:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .wallet-section {
+                padding: 20px;
+            }
+
+            .balance-amount {
+                font-size: 2rem;
+            }
+        }
+    </style>
+<script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚡ Bitcoin Wallet</h1>
+            <p class="subtitle">Real Bitcoin Wallet with Real Transactions</p>
+        </header>
+
+        <!-- Create/Import Wallet Section -->
+        <div class="wallet-section">
+            <h2 class="section-title">🔐 Wallet Setup</h2>
+            <div class="wallet-actions">
+                <button class="btn-primary" onclick="createWallet()">Create New Wallet</button>
+                <button class="btn-secondary" onclick="showImportForm()">Import Existing Wallet</button>
+            </div>
+
+            <div id="importForm" class="hidden">
+                <div class="send-form">
+                    <div class="input-group">
+                        <label>Enter Private Key (WIF format)</label>
+                        <input type="text" id="importPrivateKey" placeholder="Enter your private key">
+                    </div>
+                    <button class="btn-primary" onclick="importWallet()">Import Wallet</button>
+                </div>
+            </div>
+
+            <div id="walletInfo" class="hidden">
+                <div class="wallet-info">
+                    <div class="info-row">
+                        <span class="info-label">Wallet ID</span>
+                        <span class="info-value" id="displayWalletId">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Address</span>
+                        <span class="info-value">
+                            <span id="displayAddress">-</span>
+                            <button class="copy-btn" onclick="copyAddress()">Copy</button>
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Private Key</span>
+                        <span class="info-value">
+                            <span id="displayPrivateKey">-</span>
+                            <button class="copy-btn" onclick="copyPrivateKey()">Copy</button>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="qr-code" id="qrCode">
+                    <img id="qrCodeImage" src="" alt="QR Code">
+                </div>
+
+                <div class="balance-display">
+                    <div class="balance-amount" id="balanceAmount">0.00000000</div>
+                    <div class="balance-label">BTC Balance</div>
+                </div>
+
+                <div class="wallet-actions">
+                    <button class="btn-primary" onclick="refreshWallet()">Refresh Balance</button>
+                    <button class="btn-secondary" onclick="showSendForm()">Send Bitcoin</button>
+                </div>
+
+                <div id="sendForm" class="hidden send-form">
+                    <h3>Send Bitcoin</h3>
+                    <div class="input-group" style="margin-top: 15px;">
+                        <label>Recipient Address</label>
+                        <input type="text" id="sendAddress" placeholder="Enter Bitcoin address">
+                    </div>
+                    <div class="input-group">
+                        <label>Amount (BTC)</label>
+                        <input type="number" id="sendAmount" placeholder="0.001" step="0.00000001" min="0">
+                    </div>
+                    <div class="input-group">
+                        <label>Fee Rate (sat/byte) - Optional</label>
+                        <input type="number" id="sendFeeRate" placeholder="10" value="10" min="1">
+                    </div>
+                    <div class="wallet-actions">
+                        <button class="btn-primary" onclick="sendBitcoin()">Send Bitcoin</button>
+                        <button class="btn-secondary" onclick="hideSendForm()">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transactions Section -->
+        <div class="wallet-section hidden" id="transactionsSection">
+            <h2 class="section-title">📋 Transaction History</h2>
+            <div class="transactions-list" id="transactionsList">
+                <p style="text-align: center; color: #888;">No transactions found</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let walletId = null;
+        let currentAddress = null;
+
+        // Create new wallet
+        async function createWallet() {
+            try {
+                const response = await fetch('/api/wallet/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    walletId = data.walletId;
+                    currentAddress = data.address;
+                    displayWallet(data);
+                    await loadWalletData();
+                } else {
+                    alert('Failed to create wallet: ' + data.error);
+                }
+            } catch (error) {
+                alert('Error creating wallet: ' + error.message);
+            }
+        }
+
+        // Show import form
+        function showImportForm() {
+            document.getElementById('importForm').classList.remove('hidden');
+        }
+
+        // Import existing wallet
+        async function importWallet() {
+            const privateKey = document.getElementById('importPrivateKey').value.trim();
+            
+            if (!privateKey) {
+                alert('Please enter a private key');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/wallet/import', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ privateKey })
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    walletId = data.walletId;
+                    currentAddress = data.address;
+                    displayWallet(data);
+                    document.getElementById('importForm').classList.add('hidden');
+                    await loadWalletData();
+                } else {
+                    alert('Failed to import wallet: ' + data.error);
+                }
+            } catch (error) {
+                alert('Error importing wallet: ' + error.message);
+            }
+        }
+
+        // Display wallet information
+        function displayWallet(data) {
+            document.getElementById('walletInfo').classList.remove('hidden');
+            document.getElementById('displayWalletId').textContent = data.walletId;
+            document.getElementById('displayAddress').textContent = data.address;
+            document.getElementById('displayPrivateKey').textContent = data.privateKey;
+        }
+
+        // Load wallet data (balance, transactions, QR code)
+        async function loadWalletData() {
+            if (!walletId) return;
+
+            // Get balance
+            const balanceResponse = await fetch(`/api/wallet/${walletId}/balance`);
+            const balanceData = await balanceResponse.json();
+
+            if (balanceData.success) {
+                document.getElementById('balanceAmount').textContent = 
+                    balanceData.balance.toFixed(8) + ' BTC';
+            }
+
+            // Get transactions
+            const txResponse = await fetch(`/api/wallet/${walletId}/transactions`);
+            const txData = await txResponse.json();
+
+            if (txData.success) {
+                displayTransactions(txData.transactions);
+            }
+
+            // Get QR code
+            const qrResponse = await fetch(`/api/wallet/${walletId}/qrcode`);
+            const qrData = await qrResponse.json();
+
+            if (qrData.success) {
+                document.getElementById('qrCodeImage').src = qrData.qrCode;
+            }
+        }
+
+        // Display transactions
+        function displayTransactions(transactions) {
+            const container = document.getElementById('transactionsList');
+            const section = document.getElementById('transactionsSection');
+
+            if (transactions.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #888;">No transactions found</p>';
+                section.classList.add('hidden');
+                return;
+            }
+
+            section.classList.remove('hidden');
+
+            let html = '';
+            transactions.forEach(tx => {
+                const isReceived = tx.amount > 0;
+                const typeClass = isReceived ? 'received' : 'sent';
+                const amountClass = isReceived ? 'positive' : 'negative';
+                const amountPrefix = isReceived ? '+' : '';
+
+                html += `
+                    <div class="transaction-item ${typeClass}">
+                        <div class="tx-header">
+                            <span class="tx-id">TXID: ${tx.txid.substring(0, 16)}...</span>
+                            <span class="tx-status ${tx.status}">${tx.status}</span>
+                        </div>
+                        <div class="tx-amount ${amountClass}">
+                            ${amountPrefix}${tx.amount.toFixed(8)} BTC
+                        </div>
+                        <div style="font-size: 0.8rem; color: #888; margin-top: 5px;">
+                            ${new Date(tx.timestamp * 1000).toLocaleString()}
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // Refresh wallet data
+        async function refreshWallet() {
+            if (!walletId) {
+                alert('No wallet loaded');
+                return;
+            }
+
+            await loadWalletData();
+            alert('Wallet refreshed successfully!');
+        }
+
+        // Show send form
+        function showSendForm() {
+            document.getElementById('sendForm').classList.remove('hidden');
+        }
+
+        // Hide send form
+        function hideSendForm() {
+            document.getElementById('sendForm').classList.add('hidden');
+        }
+
+        // Send Bitcoin
+        async function sendBitcoin() {
+            if (!walletId) {
+                alert('No wallet loaded');
+                return;
+            }
+
+            const address = document.getElementById('sendAddress').value.trim();
+            const amount = parseFloat(document.getElementById('sendAmount').value);
+            const feeRate = parseInt(document.getElementById('sendFeeRate').value) || 10;
+
+            if (!address || !amount) {
+                alert('Please fill in recipient address and amount');
+                return;
+            }
+
+            if (amount <= 0) {
+                alert('Amount must be greater than 0');
+                return;
+            }
+
+            if (!confirm(`Send ${amount} BTC to ${address}?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/wallet/${walletId}/send`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ recipientAddress: address, amount, feeRate })
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    alert(`Transaction sent successfully!\n\nTXID: ${data.txid}\nAmount: ${data.amount} BTC\nFee: ${data.fee.toFixed(8)} BTC`);
+                    hideSendForm();
+                    document.getElementById('sendAddress').value = '';
+                    document.getElementById('sendAmount').value = '';
+                    await loadWalletData();
+                } else {
+                    alert('Failed to send Bitcoin: ' + data.error);
+                }
+            } catch (error) {
+                alert('Error sending Bitcoin: ' + error.message);
+            }
+        }
+
+        // Copy address to clipboard
+        function copyAddress() {
+            if (currentAddress) {
+                navigator.clipboard.writeText(currentAddress);
+                alert('Address copied to clipboard!');
+            }
+        }
+
+        // Copy private key to clipboard
+        function copyPrivateKey() {
+            const privateKey = document.getElementById('displayPrivateKey').textContent;
+            if (privateKey && privateKey !== '-') {
+                navigator.clipboard.writeText(privateKey);
+                alert('Private key copied to clipboard! ⚠️ Keep it safe!');
+            }
+        }
+    </script>
+</body>
+</html>
